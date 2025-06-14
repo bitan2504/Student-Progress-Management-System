@@ -46,16 +46,6 @@ const studentSchema = new mongoose.Schema({
         required: true,
         trim: true,
         unique: true,
-    },
-    currentRating: {
-        type: Number,
-        required: true,
-        default: 0,
-    },
-    maxRating: {
-        type: Number,
-        required: true,
-        default: 0,
     }
 });
 

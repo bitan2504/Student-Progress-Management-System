@@ -6,8 +6,6 @@ import connectDB from "./db.js";
 import app from "./app.js";
 import chalk from "chalk";
 
-console.log(process.env);
-
 connectDB()
     .then(() => {
         // Start the server after successful database connection

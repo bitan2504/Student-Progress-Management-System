@@ -4,7 +4,7 @@ import cors from 'cors';
 /**
  * Express application instance used to configure middleware, routes, and server settings.
  * @type {import('express').Express}
- */
+*/
 const app = express();
 
 // Middleware to parse incoming JSON requests
@@ -33,6 +33,9 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+
+import studentRouter from './routes/student.js';
+app.use('/student', studentRouter);
 
 // Export the configured Express app instance
 export default app;
