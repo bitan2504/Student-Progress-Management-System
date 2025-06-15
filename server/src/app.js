@@ -37,6 +37,10 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+});
+
 import studentRouter from './routes/student.js';
 import adminRouter from './routes/admin.js';
 app.use('/student', studentRouter);

@@ -55,6 +55,26 @@ const login = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    try {
+        res.clearCookie('accessToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
+        })
+            .clearCookie('refreshToken', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'none',
+            })
+            .status(200)
+            .json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
 // for experimental purposes, this function is used to register a new admin
 const register = async (req, res) => {
     const { username, password } = req.body;
@@ -62,14 +82,13 @@ const register = async (req, res) => {
         const admin = new Admin({ username, password });
         await admin.save();
         res.status(201).json({ message: 'Admin registered successfully' });
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Registration error:', error);
         if (error.code === 11000) {
             return res.status(400).json({ message: 'Username already exists' });
         }
         return res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
-export { login, register };
+export { login, logout, register };

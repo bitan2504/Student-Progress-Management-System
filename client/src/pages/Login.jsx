@@ -1,12 +1,21 @@
 import axios from 'axios';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Context from '../context/context';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { setToken } = useContext(Context);
+  const { setToken, user, setUser } = useContext(Context);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+      console.log('User is already logged in, redirecting to home page.');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,9 +37,11 @@ export default function Login() {
       if (response.status === 200) {
         const accessToken = response.data.accessToken;
         setToken(accessToken);
+        setUser(true);
         toast.success('Login successful');
-        window.location.href = '/';
       } else {
+        setUser(false);
+        setToken('');
         toast.error('Login failed');
         console.error('Login failed:', response.data.message);
       }

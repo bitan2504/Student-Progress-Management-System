@@ -7,20 +7,20 @@ import Navbar from './components/Navbar.jsx';
 import Provider from './context/provider.jsx';
 import Login from './pages/Login.jsx';
 import 'react-toastify/dist/ReactToastify.css';
+import NotFound from './pages/NotFound.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Provider>
         <Routes>
-          {/* <Navbar /> */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />``
           <Route path="/" element={<><Navbar /><App /></>}>
           </Route>
           {/* <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
+          <Route path="/contact" element={<Contact />} /> */}
 
-        <Route path="*" element={<NotFound />} /> */}
+        <Route path="*" element={<NotFound />} />
         </Routes>
       </Provider>
     </BrowserRouter>

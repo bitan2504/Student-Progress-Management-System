@@ -1,4 +1,4 @@
-.navbar .login {
+.navbar .login, .navbar .logout {
     cursor: pointer;
     display: flex;
     flex-direction: row;
