@@ -1,5 +1,5 @@
-import user_info from "../utils/codeforces/api/user_info.js";
-import student from "../models/student.js";
+import user_info from '../utils/codeforces/api/user_info.js';
+import student from '../models/student.js';
 
 /**
  * Controller to add a new student to the database.
@@ -15,14 +15,19 @@ const addStudent = async (req, res) => {
         const { name, email, phoneNumber, codeforcesHandle } = req.body;
 
         // Log the incoming request for debugging
-        console.log('Adding new student:', { name, email, phoneNumber, codeforcesHandle });
+        console.log('Adding new student:', {
+            name,
+            email,
+            phoneNumber,
+            codeforcesHandle,
+        });
 
         // Create a new student document
         const newStudent = new student({
             name,
             email,
             phoneNumber,
-            codeforcesHandle
+            codeforcesHandle,
         });
 
         // Save the student to the database
@@ -36,7 +41,7 @@ const addStudent = async (req, res) => {
         console.error('Error adding student:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 /**
  * Controller to fetch a paginated list of students from the database.
@@ -56,19 +61,41 @@ const fetchPage = async (req, res) => {
         const students = await student.aggregate([
             { $skip: parseInt(start) },
             { $limit: parseInt(limit) },
-            { $project: { _id: 0, __v: 0 } }
+            { $project: { _id: 0, __v: 0 } },
         ]);
+
+        const userhandles = students.map((s) => s.codeforcesHandle);
+        const userInfo = await user_info(userhandles);
+        students.forEach((student, index) => {
+            const info = userInfo.find(
+                (u) => u.handle === student.codeforcesHandle
+            );
+            if (info) {
+                student.rating = info.rating;
+                student.rank = info.rank;
+                student.maxRating = info.maxRating;
+                student.maxRank = info.maxRank;
+            } else {
+                student.rating = 'N/A';
+                student.rank = 'N/A';
+                student.maxRating = 'N/A';
+                student.maxRank = 'N/A';
+            }
+        });
 
         // Log the number of students fetched
         console.log(`Fetched ${students.length} students`);
 
-        res.status(200).json({ students, message: 'Students fetched successfully' });
+        res.status(200).json({
+            students,
+            message: 'Students fetched successfully',
+        });
     } catch (error) {
         // Log error details for debugging
         console.error('Error fetching student:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 /**
  * Controller to fetch Codeforces user info for given handles.
@@ -79,9 +106,15 @@ const fetchCodeforcesInfo = async (req, res) => {
         const { codeforcesHandles } = req.body;
 
         // Validate input
-        if (!codeforcesHandles || !Array.isArray(codeforcesHandles) || codeforcesHandles.length === 0) {
+        if (
+            !codeforcesHandles ||
+            !Array.isArray(codeforcesHandles) ||
+            codeforcesHandles.length === 0
+        ) {
             console.warn('Invalid Codeforces handles:', codeforcesHandles);
-            return res.status(400).json({ message: 'Invalid Codeforces handles' });
+            return res
+                .status(400)
+                .json({ message: 'Invalid Codeforces handles' });
         }
 
         // Log the handles being fetched
@@ -92,8 +125,13 @@ const fetchCodeforcesInfo = async (req, res) => {
 
         // Check if user info was found
         if (!userInfo || userInfo.length === 0) {
-            console.warn('No user information found for handles:', codeforcesHandles);
-            return res.status(404).json({ message: 'No user information found' });
+            console.warn(
+                'No user information found for handles:',
+                codeforcesHandles
+            );
+            return res
+                .status(404)
+                .json({ message: 'No user information found' });
         }
 
         // Log success and send response
@@ -104,6 +142,6 @@ const fetchCodeforcesInfo = async (req, res) => {
         console.error('Error fetching student info:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-}
+};
 
 export { addStudent, fetchPage, fetchCodeforcesInfo };
