@@ -20,6 +20,9 @@ app.use(express.static('public'));
 app.use(
     cors({
         origin: process.env.CORS_ORIGIN,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        headers: ['Content-Type', 'Authorization'],
+        credentials: true,
     })
 );
 
