@@ -4,7 +4,7 @@ import { addStudent, fetchCodeforcesInfo, fetchPage } from '../controllers/stude
 const router = Router();
 
 router.post('/addStudent', addStudent);
-router.get('/fetchCodeforcesInfo', fetchCodeforcesInfo);
+router.post('/fetchCodeforcesInfo', fetchCodeforcesInfo);
 router.get('/fetchPage', fetchPage);
 
 export default router;

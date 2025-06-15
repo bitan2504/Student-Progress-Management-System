@@ -29,7 +29,7 @@ const adminSchema = new mongoose.Schema({
 });
 
 adminSchema.pre('save', function (next) {
-    if (this.isModified === false) {
+    if (this.isModified) {
         this.password = bcrypt.hashSync(this.password, 10);
     }
     next();
@@ -40,22 +40,15 @@ adminSchema.methods.comparePassword = function (token) {
 };
 
 adminSchema.methods.createAccessToken = function () {
-    return jwt.sign(this._id, process.env.ACCESS_TOKEN_SECRET, {
+    return jwt.sign({ _id: this._id }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     });
 };
 
 adminSchema.methods.createRefreshToken = function () {
-    return jwt.sign(
-        {
-            _id: this._id,
-            username: this.username,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-        }
-    );
+    return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+    });
 };
 
 export default mongoose.model('Admin', adminSchema);

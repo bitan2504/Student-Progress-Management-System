@@ -35,7 +35,9 @@ app.use((req, res, next) => {
 });
 
 import studentRouter from './routes/student.js';
+import adminRouter from './routes/admin.js';
 app.use('/student', studentRouter);
+app.use('/admin', adminRouter);
 
 // Export the configured Express app instance
 export default app;
