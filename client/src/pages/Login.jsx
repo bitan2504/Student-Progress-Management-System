@@ -2,13 +2,11 @@ import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Context from '../context/context';
-import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { setToken, user, setUser } = useContext(Context);
-  const navigate = useNavigate();
+  const { setToken, user, setUser, navigate } = useContext(Context);
 
   useEffect(() => {
     if (user) {

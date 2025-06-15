@@ -45,7 +45,7 @@ export default function App() {
         <Link to="/" className="ml-4">
           Home
         </Link>
-        <Link to="table" className="ml-4">
+        <Link to="/table" className="ml-4">
           Table
         </Link>
         <Link to="/about" className="ml-4">

@@ -55,7 +55,8 @@ const fetchPage = async (req, res) => {
         // Fetch students using aggregation with skip and limit
         const students = await student.aggregate([
             { $skip: parseInt(start) },
-            { $limit: parseInt(limit) }
+            { $limit: parseInt(limit) },
+            { $project: { _id: 0, __v: 0 } }
         ]);
 
         // Log the number of students fetched
