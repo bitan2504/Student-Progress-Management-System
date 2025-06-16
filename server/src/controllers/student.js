@@ -1,5 +1,6 @@
 import user_info from '../utils/codeforces/api/user_info.js';
 import student from '../models/student.js';
+import submissions from '../utils/codeforces/api/submissions.js';
 
 /**
  * Controller to add a new student to the database.
@@ -144,4 +145,28 @@ const fetchCodeforcesInfo = async (req, res) => {
     }
 };
 
-export { addStudent, fetchPage, fetchCodeforcesInfo };
+const fetchSubmissions = async (req, res) => {
+    try {
+        const { codeforcesHandle } = req.body;
+
+        if (!codeforcesHandle) {
+            return res.status(400).json({ message: 'Invalid Codeforces handle' });
+        }
+        console.log('Fetching submissions for handle:', codeforcesHandle);
+
+        // Fetch submissions from Codeforces API
+        const response = await submissions(codeforcesHandle);
+        if (!response || response.length === 0) {
+            return res.status(404).json({ message: 'No submissions found' });
+        }
+
+        // Log success and send response
+        console.log('Fetched submissions successfully');
+        res.status(200).json(response);
+    } catch (error) {
+        console.error('Error fetching submissions:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export { addStudent, fetchPage, fetchCodeforcesInfo, fetchSubmissions };
