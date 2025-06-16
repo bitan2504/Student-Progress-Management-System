@@ -1,7 +1,8 @@
 import axios from 'axios';
-import { use, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Context from '../context/context.jsx';
+import VerticalBarChart from '../components/VerticalBarChart.jsx';
 
 function SubmissionApp({ submissions, setSubmissions, handle, token }) {
   const [error, setError] = useState('');
@@ -19,6 +20,8 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
   const [totalProblemsSolved, setTotalProblemsSolved] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [averageProblemsSolved, setAverageProblemsSolved] = useState(0);
+
+  const [problemByRating, setProblemByRating] = useState(new Map());
 
   const fetchSubmissions = async () => {
     try {
@@ -65,18 +68,35 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
 
   const analyzeFilteredSubmissions = () => {
     let totalRating = 0,
-      totalRatedProblems = 0;
+      totalRatedProblems = 0,
+      mostDifficultProblemRating = 0,
+      mostDifficultProblem = 'N/A';
+    const problemByRatingMap = new Map();
     filteredSubmissions.forEach((submission) => {
       if (
-        submission.problem.rating &&
-        submission.problem.rating > mostDifficultProblemRating
+        (submission.problem.rating || submission.problem.points) &&
+        (submission.problem.rating > mostDifficultProblemRating ||
+          submission.problem.points > mostDifficultProblemRating)
       ) {
-        setMostDifficultProblemRating(submission.problem.rating);
-        setMostDifficultProblem(submission.problem.name);
+        mostDifficultProblemRating =
+          submission.problem.rating || submission.problem.points;
+        mostDifficultProblem = submission.problem.name;
       }
-      totalRating += submission.problem.rating || 0;
-      totalRatedProblems += submission.problem.rating ? 1 : 0;
+      totalRating +=
+        submission.problem.rating || submission.problem.points || 0;
+      totalRatedProblems +=
+        submission.problem.rating || submission.problem.points ? 1 : 0;
+
+      problemByRatingMap.set(
+        submission.problem.rating || submission.problem.points || 800,
+        (problemByRatingMap.get(
+          submission.problem.rating || submission.problem.points || 800
+        ) || 0) + 1
+      );
     });
+
+    setMostDifficultProblem(mostDifficultProblem);
+    setMostDifficultProblemRating(mostDifficultProblemRating);
     setAverageRating(
       totalRatedProblems > 0 ? (0.0 + totalRating) / totalRatedProblems : 0
     );
@@ -86,6 +106,7 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
         ? (0.0 + totalRatedProblems) / totalRatedProblems
         : 0
     );
+    setProblemByRating(problemByRatingMap);
   };
 
   useEffect(() => {
@@ -127,7 +148,7 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
               onChange={(e) => setSelectedFilter(e.target.value)}
             >
               {Object.keys(filters).map((filter) => (
-                <option key={filter} value={filter} className='text-sm'>
+                <option key={filter} value={filter} className="text-sm">
                   {filter}
                 </option>
               ))}
@@ -162,6 +183,7 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
           </div>
         </div>
       )}
+      <VerticalBarChart problemByRating={problemByRating} />
     </div>
   );
 }
