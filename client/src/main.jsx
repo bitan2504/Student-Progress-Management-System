@@ -10,11 +10,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import NotFound from './pages/NotFound.jsx';
 import Table from './pages/Table.jsx';
 import StudentInfo from './pages/StudentInfo.jsx';
+import AutoSignin from './components/AutoSignin.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Provider>
+        <AutoSignin />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<><Navbar /><App /></>} />

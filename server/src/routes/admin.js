@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { login, logout, register } from '../controllers/admin.js';
+import { autosignin, login, logout, register } from '../controllers/admin.js';
 import authMiddleware from '../middlewares/auth.js';
 
 const router = Router();
 router.post('/login', login);
+router.get('/auto', autosignin);
 router.get('/logout', authMiddleware, logout);
 router.post('/register', register);
 

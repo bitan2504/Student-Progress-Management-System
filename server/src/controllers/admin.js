@@ -1,4 +1,5 @@
 import Admin from '../models/admin.js';
+import jwt from 'jsonwebtoken';
 
 /**
  * Handles admin login requests.
@@ -59,16 +60,52 @@ const logout = async (req, res) => {
     try {
         res.clearCookie('accessToken', {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'none',
         })
             .clearCookie('refreshToken', {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: true,
                 sameSite: 'none',
             })
             .status(200)
             .json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+const autosignin = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        const admin = await Admin.findById(decoded._id);
+        if (!admin) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        const accessToken = await admin.createAccessToken();
+        const refreshToken = await admin.createRefreshToken();
+        res.status(200)
+            .header('Authorization', `Bearer ${accessToken}`)
+            .cookie('accessToken', accessToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            })
+            .cookie('refreshToken', refreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+            })
+            .json({
+                message: 'Login successful',
+                accessToken,
+            });
     } catch (error) {
         console.error('Logout error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -91,4 +128,4 @@ const register = async (req, res) => {
     }
 };
 
-export { login, logout, register };
+export { login, logout, register, autosignin };
