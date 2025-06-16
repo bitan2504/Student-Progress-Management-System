@@ -65,7 +65,7 @@ export default function App() {
                   `${import.meta.env.VITE_API_URL}/admin/logout`,
                   {
                     headers: {
-                      Authorization: `Bearer ${token}`,
+                      'Authorization': `Bearer ${token}`,
                     },
                     withCredentials: true,
                   }

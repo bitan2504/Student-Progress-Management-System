@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 /**
  * Express application instance used to configure middleware, routes, and server settings.
@@ -15,6 +16,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from the 'public' directory
 app.use(express.static('public'));
+
+// Middleware access to cookies
+app.use(cookieParser());
 
 // Enable CORS with allowed origin from environment variable
 app.use(

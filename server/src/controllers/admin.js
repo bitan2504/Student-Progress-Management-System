@@ -37,12 +37,12 @@ const login = async (req, res) => {
             .header('Authorization', `Bearer ${accessToken}`)
             .cookie('accessToken', accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: true,
                 sameSite: 'none',
             })
             .cookie('refreshToken', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: true,
                 sameSite: 'none',
             })
             .json({

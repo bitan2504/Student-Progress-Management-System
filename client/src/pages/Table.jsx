@@ -14,7 +14,7 @@ export default function Table() {
         `${import.meta.env.VITE_API_URL}/student/fetchPage`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           params: {
             start: page - 1,

@@ -31,7 +31,7 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           withCredentials: true,
         }
@@ -217,7 +217,7 @@ export default function StudentInfo() {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            'Authorization': `Bearer ${token}`,
           },
           withCredentials: true,
         }
