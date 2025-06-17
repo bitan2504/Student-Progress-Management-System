@@ -11,21 +11,54 @@ import NotFound from './pages/NotFound.jsx';
 import Table from './pages/Table.jsx';
 import StudentInfo from './pages/StudentInfo.jsx';
 import AutoSignin from './components/AutoSignin.jsx';
+import { ToastContainer } from 'react-toastify';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Provider>
+        <ToastContainer
+          position="top-right"
+          autoClose="5000"
+          hideProgressBar="false"
+          closeOnClick="true"
+          pauseOnHover="true"
+          draggable="true"
+        />
         <AutoSignin />
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<><Navbar /><App /></>} />
-          <Route path="/table" element={<><Navbar /><Table /></>} />
-          <Route path="/student/:handle" element={<><Navbar /><StudentInfo /></>} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar />
+                <App />
+              </>
+            }
+          />
+          <Route
+            path="/table"
+            element={
+              <>
+                <Navbar />
+                <Table />
+              </>
+            }
+          />
+          <Route
+            path="/student/:handle"
+            element={
+              <>
+                <Navbar />
+                <StudentInfo />
+              </>
+            }
+          />
           {/* <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} /> */}
 
-        <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Provider>
     </BrowserRouter>

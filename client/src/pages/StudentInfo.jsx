@@ -189,25 +189,12 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
 }
 
 export default function StudentInfo() {
-  const ratingColor = {
-    newbie: 'text-gray-500',
-    pupil: 'text-green-500',
-    specialist: 'text-cyan-600',
-    expert: 'text-blue-500',
-    'candidate master': 'text-purple-500',
-    master: 'text-yellow-500',
-    'international master': 'text-orange-500',
-    grandmaster: 'text-red-500',
-    'international grandmaster': 'text-pink-500',
-    'legendary grandmaster': 'text-indigo-500',
-    unrated: 'text-black-500',
-  };
   const { handle } = useParams();
   const [studentInfo, setStudentInfo] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { token, navigate, user } = useContext(Context);
+  const { token, navigate, user, ratingColor } = useContext(Context);
 
   const fetchStudentInfo = async () => {
     try {
@@ -241,19 +228,6 @@ export default function StudentInfo() {
     setError('');
     fetchStudentInfo();
   }, [handle, token, user]);
-
-  const handleRefresh = () => {
-    setStudentInfo(null);
-    setError('');
-    setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
-      setLoading(true);
-      setError('');
-      fetchStudentInfo();
-    }, 1000);
-  };
 
   return (
     <div className="w-full flex flex-col gap-8">

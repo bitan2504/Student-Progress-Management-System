@@ -1,5 +1,5 @@
 import user_info from '../utils/codeforces/api/user_info.js';
-import student from '../models/student.js';
+import Student from '../models/student.js';
 import submissions from '../utils/codeforces/api/submissions.js';
 
 /**
@@ -24,7 +24,7 @@ const addStudent = async (req, res) => {
         });
 
         // Create a new student document
-        const newStudent = new student({
+        const newStudent = new Student({
             name,
             email,
             phoneNumber,
@@ -37,6 +37,77 @@ const addStudent = async (req, res) => {
         // Log success and send response
         console.log('Student added successfully:', newStudent._id);
         res.status(201).json({ message: 'Student added successfully' });
+    } catch (error) {
+        // Log error details for debugging
+        console.error('Error adding student:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+/**
+ * Edits an existing student's details in the database.
+ *
+ * This controller function updates a student's name, email, phone number, and Codeforces handle.
+ * It checks for duplicate email, phone number, and Codeforces handle before updating.
+ * Responds with appropriate status codes and messages based on the outcome.
+ */
+const editStudent = async (req, res) => {
+    try {
+        // Extract student details from request body
+        const { _id, name, email, phoneNumber, codeforcesHandle } = req.body;
+
+        // Log the incoming request for debugging
+        console.log('Editing Student: ', {
+            _id,
+            name,
+            email,
+            phoneNumber,
+            codeforcesHandle,
+        });
+
+        // edit student data and check if duplicate exists
+        const student = await Student.findById(_id);
+        if (!student) {
+            return res.status(401).json({ message: 'An unkwon error ocurred' });
+        }
+
+        student.name = name;
+        if (student.email !== email) {
+            const duplicate = await Student.findOne({ email });
+            if (duplicate) {
+                return res.status(401).json({
+                    message: 'Student with given email already exists',
+                });
+            }
+        }
+        student.email = email;
+
+        if (student.phoneNumber !== phoneNumber) {
+            const duplicate = await Student.findOne({ phoneNumber });
+            if (duplicate) {
+                return res.status(401).json({
+                    message: 'Student with given phone number already exists',
+                });
+            }
+        }
+        student.phoneNumber = phoneNumber;
+
+        if (student.codeforcesHandle !== codeforcesHandle) {
+            const duplicate = await Student.findOne({ codeforcesHandle });
+            if (duplicate) {
+                return res.status(401).json({
+                    message: 'Student with given codeforces handle already exists',
+                });
+            }
+        }
+        student.codeforcesHandle = codeforcesHandle;
+
+        // Save the student to the database
+        await student.save();
+
+        // Log success and send response
+        console.log('Student editted successfully:', student._id);
+        res.status(201).json({ message: 'Student editted successfully' });
     } catch (error) {
         // Log error details for debugging
         console.error('Error adding student:', error);
@@ -59,10 +130,10 @@ const fetchPage = async (req, res) => {
         console.log(`Fetching students from ${start} with limit ${limit}`);
 
         // Fetch students using aggregation with skip and limit
-        const students = await student.aggregate([
+        const students = await Student.aggregate([
             { $skip: parseInt(start) },
             { $limit: parseInt(limit) },
-            { $project: { _id: 0, __v: 0 } },
+            { $project: { __v: 0 } },
         ]);
 
         const userhandles = students.map((s) => s.codeforcesHandle);
@@ -150,7 +221,9 @@ const fetchSubmissions = async (req, res) => {
         const { codeforcesHandle } = req.body;
 
         if (!codeforcesHandle) {
-            return res.status(400).json({ message: 'Invalid Codeforces handle' });
+            return res
+                .status(400)
+                .json({ message: 'Invalid Codeforces handle' });
         }
         console.log('Fetching submissions for handle:', codeforcesHandle);
 
@@ -169,4 +242,4 @@ const fetchSubmissions = async (req, res) => {
     }
 };
 
-export { addStudent, fetchPage, fetchCodeforcesInfo, fetchSubmissions };
+export { addStudent, fetchPage, fetchCodeforcesInfo, fetchSubmissions, editStudent };

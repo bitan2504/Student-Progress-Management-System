@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import Context from '../context/context';
 
 export default function Login() {
@@ -54,14 +54,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <ToastContainer
-        position="top-right"
-        autoClose="5000"
-        hideProgressBar="false"
-        closeOnClick="true"
-        pauseOnHover="true"
-        draggable="true"
-      />
       <form
         className="bg-white p-8 rounded-xl shadow-lg min-w-[320px] w-full max-w-sm"
         onSubmit={handleSubmit}
