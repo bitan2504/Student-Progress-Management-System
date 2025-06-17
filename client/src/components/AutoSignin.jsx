@@ -8,17 +8,24 @@ export default function AutoSignin() {
 
   const autoSignin = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/auto`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/admin/auto`,
+        {
+          withCredentials: true,
+        }
+      );
       console.log(response.data);
       if (response.status === 200) {
         const accessToken = response.data.accessToken;
         setToken(accessToken);
         setUser(true);
+      } else {
+        console.log(error);
+        setUser(false);
       }
     } catch (error) {
       console.log(error);
+      setUser(false);
     }
   };
 

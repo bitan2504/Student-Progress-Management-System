@@ -146,9 +146,12 @@ export default function Table() {
                         className={`px-4 py-2 border-b border-gray-200 ${col === 'rank' ? ratingColor[row[col]] + ' font-semibold' : ''}`}
                       >
                         {editable != idx ||
-                        ['phoneNumber', 'name', 'codeforcesHandle', 'email'].findIndex(
-                          (item) => item === col
-                        ) === -1 ? (
+                        [
+                          'phoneNumber',
+                          'name',
+                          'codeforcesHandle',
+                          'email',
+                        ].findIndex((item) => item === col) === -1 ? (
                           <>
                             {col !== 'codeforcesHandle' ? (
                               row[col]

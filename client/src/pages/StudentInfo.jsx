@@ -206,13 +206,17 @@ export default function StudentInfo() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
         }
       );
-      setStudentInfo(response.data.data);
-      console.log('Student Info:', response.data);
+      if (response.status === 200) {
+        setStudentInfo(response.data.data);
+      } else {
+        setUser(undefined);
+        setToken('');
+      }
     } catch (error) {
       setError('Failed to fetch student information.');
       console.error('Error fetching student info:', error);
@@ -225,6 +229,7 @@ export default function StudentInfo() {
   };
 
   useEffect(() => {
+    console.log(user, user !== undefined);
     if (user !== undefined && (!user || !token)) {
       navigate('/login');
       return;
@@ -233,7 +238,7 @@ export default function StudentInfo() {
     setLoading(true);
     setError('');
     fetchStudentInfo();
-  }, [handle, token, user]);
+  }, [handle, token, user, navigate]);
 
   return (
     <div className="w-full flex flex-col gap-8">
