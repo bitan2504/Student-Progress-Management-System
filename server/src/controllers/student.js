@@ -15,13 +15,18 @@ const addStudent = async (req, res) => {
         // Extract student details from request body
         const { name, email, phoneNumber, codeforcesHandle } = req.body;
 
-        // Log the incoming request for debugging
-        console.log('Adding new student:', {
-            name,
-            email,
-            phoneNumber,
-            codeforcesHandle,
+        const existingStudent = await Student.findOne({
+            $or: [{ email }, { phoneNumber }, { codeforcesHandle }],
         });
+
+        if (existingStudent) {
+            return res.status(401).json({
+                message:
+                    'Student with same email, phone number or codeforces handle already exists',
+            });
+        }
+
+        const codeforcesData = await user_info([codeforcesHandle]);
 
         // Create a new student document
         const newStudent = new Student({
@@ -29,6 +34,7 @@ const addStudent = async (req, res) => {
             email,
             phoneNumber,
             codeforcesHandle,
+            codeforcesData: codeforcesData[0],
         });
 
         // Save the student to the database
@@ -71,43 +77,46 @@ const editStudent = async (req, res) => {
             return res.status(401).json({ message: 'An unkwon error ocurred' });
         }
 
+        const existingStudent = await Student.findOne({
+            $or: [{ email, phoneNumber, codeforcesHandle }],
+        });
+        if (existingStudent) {
+            return res.status(401).json({
+                message:
+                    'Student with given email, phone number or codeforces handle already exists',
+            });
+        }
         student.name = name;
-        if (student.email !== email) {
-            const duplicate = await Student.findOne({ email });
-            if (duplicate) {
-                return res.status(401).json({
-                    message: 'Student with given email already exists',
-                });
-            }
-        }
         student.email = email;
-
-        if (student.phoneNumber !== phoneNumber) {
-            const duplicate = await Student.findOne({ phoneNumber });
-            if (duplicate) {
-                return res.status(401).json({
-                    message: 'Student with given phone number already exists',
-                });
-            }
-        }
         student.phoneNumber = phoneNumber;
 
         if (student.codeforcesHandle !== codeforcesHandle) {
-            const duplicate = await Student.findOne({ codeforcesHandle });
-            if (duplicate) {
-                return res.status(401).json({
-                    message: 'Student with given codeforces handle already exists',
-                });
-            }
+            student.codeforcesHandle = codeforcesHandle;
+            const codeforcesData = await user_info([codeforcesHandle]);
+            student.codeforcesData = codeforcesData[0];
         }
-        student.codeforcesHandle = codeforcesHandle;
-
         // Save the student to the database
         await student.save();
 
+        const data = student.toObject();
+        if (data.codeforcesData) {
+            data.rating = data.codeforcesData.rating;
+            data.rank = data.codeforcesData.rank;
+            data.maxRating = data.codeforcesData.maxRating;
+            data.maxRank = data.codeforcesData.maxRank;
+        } else {
+            data.rating = 'N/A';
+            data.rank = 'N/A';
+            data.maxRating = 'N/A';
+            data.maxRank = 'N/A';
+        }
+
         // Log success and send response
-        console.log('Student editted successfully:', student._id);
-        res.status(201).json({ message: 'Student editted successfully' });
+        console.log('Student editted successfully:', data._id);
+        res.status(201).json({
+            data: data,
+            message: 'Student editted successfully',
+        });
     } catch (error) {
         // Log error details for debugging
         console.error('Error adding student:', error);
@@ -136,17 +145,13 @@ const fetchPage = async (req, res) => {
             { $project: { __v: 0 } },
         ]);
 
-        const userhandles = students.map((s) => s.codeforcesHandle);
-        const userInfo = await user_info(userhandles);
+        console.log(students.codeforcesData);
         students.forEach((student, index) => {
-            const info = userInfo.find(
-                (u) => u.handle === student.codeforcesHandle
-            );
-            if (info) {
-                student.rating = info.rating;
-                student.rank = info.rank;
-                student.maxRating = info.maxRating;
-                student.maxRank = info.maxRank;
+            if (student.codeforcesData) {
+                student.rating = student.codeforcesData.rating;
+                student.rank = student.codeforcesData.rank;
+                student.maxRating = student.codeforcesData.maxRating;
+                student.maxRank = student.codeforcesData.maxRank;
             } else {
                 student.rating = 'N/A';
                 student.rank = 'N/A';
@@ -175,40 +180,33 @@ const fetchPage = async (req, res) => {
  */
 const fetchCodeforcesInfo = async (req, res) => {
     try {
-        const { codeforcesHandles } = req.body;
+        const { codeforcesHandle } = req.body;
 
         // Validate input
-        if (
-            !codeforcesHandles ||
-            !Array.isArray(codeforcesHandles) ||
-            codeforcesHandles.length === 0
-        ) {
-            console.warn('Invalid Codeforces handles:', codeforcesHandles);
+        if (!codeforcesHandle) {
+            console.warn('Invalid Codeforces handle:', codeforcesHandle);
             return res
                 .status(400)
-                .json({ message: 'Invalid Codeforces handles' });
+                .json({ message: 'Invalid Codeforces handle' });
         }
 
         // Log the handles being fetched
-        console.log('Fetching Codeforces info for handles:', codeforcesHandles);
+        console.log('Fetching Codeforces info for handle:', codeforcesHandle);
 
         // Fetch user info from Codeforces API
-        const userInfo = await user_info(codeforcesHandles);
+        const userInfo = await Student.findOne({ codeforcesHandle });
 
-        // Check if user info was found
-        if (!userInfo || userInfo.length === 0) {
-            console.warn(
-                'No user information found for handles:',
-                codeforcesHandles
-            );
-            return res
-                .status(404)
-                .json({ message: 'No user information found' });
+        if (!userInfo) {
+            console.error('Error fetching student info:', error);
+            res.status(500).json({ message: 'An unknown error occurred' });
         }
 
         // Log success and send response
         console.log('Fetched Codeforces user info successfully');
-        res.status(200).json(userInfo);
+        res.status(200).json({
+            data: userInfo?.codeforcesData,
+            message: 'Fetched Codeforces user info successfully',
+        });
     } catch (error) {
         // Log error details for debugging
         console.error('Error fetching student info:', error);
@@ -242,4 +240,10 @@ const fetchSubmissions = async (req, res) => {
     }
 };
 
-export { addStudent, fetchPage, fetchCodeforcesInfo, fetchSubmissions, editStudent };
+export {
+    addStudent,
+    fetchPage,
+    fetchCodeforcesInfo,
+    fetchSubmissions,
+    editStudent,
+};

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 /**
  * Mongoose schema for the Student model.
@@ -33,11 +33,11 @@ const studentSchema = new mongoose.Schema({
         type: Number,
         required: true,
         validate: {
-            validator: function(v) {
+            validator: function (v) {
                 // Checks for a 10-digit phone number (adjust as needed)
                 return /^\d{10}$/.test(v.toString());
             },
-            message: props => `${props.value} is not a valid phone number!`
+            message: (props) => `${props.value} is not a valid phone number!`,
         },
         unique: true,
     },
@@ -46,7 +46,11 @@ const studentSchema = new mongoose.Schema({
         required: true,
         trim: true,
         unique: true,
-    }
+    },
+    codeforcesData: {
+        type: Object,
+        default: {},
+    },
 });
 
-export default mongoose.model("Student", studentSchema);
+export default mongoose.model('Student', studentSchema);

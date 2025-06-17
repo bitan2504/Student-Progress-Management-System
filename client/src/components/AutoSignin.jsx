@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import { useContext } from 'react';
 import Context from '../context/context.jsx';
 import axios from 'axios';
@@ -23,7 +23,8 @@ export default function AutoSignin() {
   };
 
   useEffect(() => {
-    if (!token && !user) autoSignin();
+    console.log(token, user);
+    if (token === '' && user === undefined) autoSignin();
   }, [token, user]);
 
   return <></>;

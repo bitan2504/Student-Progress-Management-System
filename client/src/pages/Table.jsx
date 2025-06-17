@@ -10,7 +10,8 @@ export default function Table() {
   const [rows, setRows] = useState([]);
   const [editable, setEditable] = useState(null);
   const [editInputs, setEditInputs] = useState({});
-  const { token, user, navigate, ratingColor } = useContext(Context);
+  const { token, user, setToken, setUser, navigate, ratingColor } =
+    useContext(Context);
 
   const fetchPage = async () => {
     try {
@@ -31,16 +32,20 @@ export default function Table() {
       if (response.status === 200) {
         setRows(response.data.students);
       } else {
+        setUser(undefined);
+        setToken('');
         setRows([]);
       }
     } catch (error) {
+      setUser(undefined);
+      setToken('');
       setRows([]);
       console.log(error);
     }
   };
 
   useEffect(() => {
-    if (!user || !token) {
+    if (user !== undefined && (!user || !token)) {
       navigate('/login');
       return;
     }
@@ -73,7 +78,7 @@ export default function Table() {
       if (response.status === 201) {
         toast.success('Successfully editted student details');
         const newRows = rows;
-        newRows[editable] = editInputs;
+        newRows[editable] = response.data.data;
         setRows(newRows);
       } else {
         toast.error(response.data.message);
@@ -109,7 +114,7 @@ export default function Table() {
             <thead>
               <tr>
                 {columns.map((col) =>
-                  col !== '_id' ? (
+                  col !== '_id' && col !== 'codeforcesData' ? (
                     <th
                       key={col}
                       className="bg-blue-700 text-white px-4 py-3 text-left font-semibold"
@@ -135,12 +140,15 @@ export default function Table() {
                   className={`w-20 ${idx % 2 === 0 ? '' : 'bg-blue-50'}`}
                 >
                   {columns.map((col) =>
-                    col !== '_id' ? (
+                    col !== '_id' && col !== 'codeforcesData' ? (
                       <td
                         key={col}
                         className={`px-4 py-2 border-b border-gray-200 ${col === 'rank' ? ratingColor[row[col]] + ' font-semibold' : ''}`}
                       >
-                        {editable != idx ? (
+                        {editable != idx ||
+                        ['phoneNumber', 'name', 'codeforcesHandle', 'email'].findIndex(
+                          (item) => item === col
+                        ) === -1 ? (
                           <>
                             {col !== 'codeforcesHandle' ? (
                               row[col]

@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Context from '../context/context.jsx';
 import VerticalBarChart from '../components/VerticalBarChart.jsx';
+import { toast } from 'react-toastify';
 
 function SubmissionApp({ submissions, setSubmissions, handle, token }) {
   const [error, setError] = useState('');
@@ -31,7 +32,7 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
           withCredentials: true,
         }
@@ -194,13 +195,14 @@ export default function StudentInfo() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { token, navigate, user, ratingColor } = useContext(Context);
+  const { token, setToken, setUser, navigate, user, ratingColor } =
+    useContext(Context);
 
   const fetchStudentInfo = async () => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/student/fetchCodeforcesInfo`,
-        { codeforcesHandles: [handle] },
+        { codeforcesHandle: handle },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -209,20 +211,24 @@ export default function StudentInfo() {
           withCredentials: true,
         }
       );
-      setStudentInfo(
-        Array.isArray(response.data) ? response.data[0] : response.data
-      );
-      console.log('Student Info:', response);
+      setStudentInfo(response.data.data);
+      console.log('Student Info:', response.data);
     } catch (error) {
       setError('Failed to fetch student information.');
       console.error('Error fetching student info:', error);
+      setUser(undefined);
+      setToken('');
+      toast.error(error.toString());
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (!user) navigate('/login');
+    if (user !== undefined && (!user || !token)) {
+      navigate('/login');
+      return;
+    }
     if (!handle) return;
     setLoading(true);
     setError('');

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Provider = ({ children }) => {
   const [token, setToken] = useState('');
-  const [user, setUser] = useState(false);
+  const [user, setUser] = useState(undefined);
   const [darkMode, setDarkMode] = useState(false);
   const navigate = useNavigate();
   const ratingColor = {
