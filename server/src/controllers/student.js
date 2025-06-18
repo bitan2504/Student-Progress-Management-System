@@ -77,10 +77,14 @@ const editStudent = async (req, res) => {
             return res.status(401).json({ message: 'An unkwon error ocurred' });
         }
 
-        const existingStudent = await Student.findOne({
+        const existingStudents = await Student.find({
             $or: [{ email, phoneNumber, codeforcesHandle }],
         });
-        if (existingStudent) {
+        console.log(existingStudents);
+        if (
+            existingStudents.filter((item) => String(item._id) !== _id).length >
+            0
+        ) {
             return res.status(401).json({
                 message:
                     'Student with given email, phone number or codeforces handle already exists',
@@ -131,7 +135,7 @@ const editStudent = async (req, res) => {
  */
 const fetchPage = async (req, res) => {
     try {
-        let { start, limit } = req.params;
+        let { start, limit } = req.query;
         start = start || 0;
         limit = limit || 25;
 
@@ -140,7 +144,7 @@ const fetchPage = async (req, res) => {
 
         // Fetch students using aggregation with skip and limit
         const students = await Student.aggregate([
-            { $skip: parseInt(start) },
+            { $skip: parseInt(start) * parseInt(limit) },
             { $limit: parseInt(limit) },
             { $project: { __v: 0 } },
         ]);
@@ -163,7 +167,7 @@ const fetchPage = async (req, res) => {
         // Log the number of students fetched
         console.log(`Fetched ${students.length} students`);
 
-        res.status(200).json({
+        res.status(400).json({
             students,
             message: 'Students fetched successfully',
         });

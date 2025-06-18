@@ -10,8 +10,7 @@ export default function Table() {
   const [rows, setRows] = useState([]);
   const [editable, setEditable] = useState(null);
   const [editInputs, setEditInputs] = useState({});
-  const { token, user, setToken, setUser, navigate, ratingColor } =
-    useContext(Context);
+  const { token, user, navigate, ratingColor } = useContext(Context);
 
   const fetchPage = async () => {
     try {
@@ -32,20 +31,18 @@ export default function Table() {
       if (response.status === 200) {
         setRows(response.data.students);
       } else {
-        setUser(undefined);
-        setToken('');
         setRows([]);
+        toast.error(response.data.message || 'Failed to fetch students');
       }
     } catch (error) {
-      setUser(undefined);
-      setToken('');
       setRows([]);
       console.log(error);
+      toast.error('Failed to fetch students');
     }
   };
 
   useEffect(() => {
-    if (user !== undefined && (!user || !token)) {
+    if (user !== undefined && (user === false || token === '')) {
       navigate('/login');
       return;
     }
@@ -105,9 +102,12 @@ export default function Table() {
 
   return (
     <div className="flex flex-col justify-center items-center mt-10 p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6">
+      <h2 className="text-2xl font-bold text-blue-700">
         Student Progress Tracker
       </h2>
+      <p className="ml-[200px] w-full text-left text-sm">
+        To add new student <u>{<Link to="/add">click here</Link>}</u>.
+      </p>
       <div>
         {columns.length > 0 && (
           <table className="overflow-auto w-fit border-collapse text-sm">

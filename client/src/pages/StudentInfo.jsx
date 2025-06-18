@@ -195,8 +195,7 @@ export default function StudentInfo() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { token, setToken, setUser, navigate, user, ratingColor } =
-    useContext(Context);
+  const { token, navigate, user, ratingColor } = useContext(Context);
 
   const fetchStudentInfo = async () => {
     try {
@@ -213,15 +212,10 @@ export default function StudentInfo() {
       );
       if (response.status === 200) {
         setStudentInfo(response.data.data);
-      } else {
-        setUser(undefined);
-        setToken('');
       }
     } catch (error) {
       setError('Failed to fetch student information.');
       console.error('Error fetching student info:', error);
-      setUser(undefined);
-      setToken('');
       toast.error(error.toString());
     } finally {
       setLoading(false);

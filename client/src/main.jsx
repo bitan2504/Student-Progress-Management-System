@@ -12,6 +12,7 @@ import Table from './pages/Table.jsx';
 import StudentInfo from './pages/StudentInfo.jsx';
 import AutoSignin from './components/AutoSignin.jsx';
 import { ToastContainer } from 'react-toastify';
+import AddStudent from './pages/AddStudent.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -43,6 +44,15 @@ createRoot(document.getElementById('root')).render(
               <>
                 <Navbar />
                 <Table />
+              </>
+            }
+          />
+          <Route
+            path="/add"
+            element={
+              <>
+                <Navbar />
+                <AddStudent />
               </>
             }
           />
