@@ -1,5 +1,32 @@
 import Student from '../../../models/student.js';
 import axios from 'axios';
+import sendEmail from '../../nodemailer.js';
+
+const checkInactivity = async (handle) => {
+    try {
+        const response = await axios.get(
+            `https://codeforces.com/api/user.status?handle=${handle}`
+        );
+        if (response.data.status === 'OK') {
+            const submissions = response.data.result;
+            const inactive = submissions.every((submission) => {
+                const submissionDate = new Date(
+                    submission.creationTimeSeconds * 1000
+                );
+                const now = new Date();
+                const diff = now - submissionDate;
+                return diff > 7 * 24 * 60 * 60 * 1000; // 7 days
+            });
+            if (inactive) {
+                console.log(`User ${handle} has been inactive for 7 days.`);
+            }
+            return inactive;
+        }
+    } catch (error) {
+        console.error('Error checking inactivity:', error);
+        return null;
+    }
+};
 
 const syncInfo = async () => {
     try {
@@ -8,6 +35,31 @@ const syncInfo = async () => {
             codeforcesData: { $exists: true },
         });
         students.forEach(async (student) => {
+            try {
+                const isInactive = await checkInactivity(
+                    student.codeforcesHandle
+                );
+                if (isInactive === true) {
+                    student.inactivityWarnings += 1;
+                    await student.save();
+                    sendEmail({
+                        to: student.email,
+                        subject: 'Codeforces Inactivity Warning',
+                        html: `<p>Dear ${student.name},</p>
+<p>You have been <strong>inactive on Codeforces for 7 days</strong>. Please try to solve some problems to keep your skills sharp!</p>
+<p>Best regards,<br>Your Friendly Reminder Bot</p>`,
+                    });
+                    console.log(
+                        `Sent inactivity warning to ${student.codeforcesHandle}`
+                    );
+                }
+            } catch (error) {
+                console.error(
+                    `Error checking inactivity for ${student.codeforcesHandle}:`,
+                    error
+                );
+            }
+
             try {
                 const response = await axios.get(
                     `https://codeforces.com/api/user.info?handles=${student.codeforcesHandle}`

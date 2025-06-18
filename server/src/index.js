@@ -5,7 +5,7 @@ dotenv.config();
 import connectDB from './db.js';
 import app from './app.js';
 import chalk from 'chalk';
-import { startCronJob } from './cron.js';
+import { startCronJob } from './utils/cron.js';
 
 connectDB()
     .then(() => {

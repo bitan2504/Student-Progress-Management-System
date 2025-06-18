@@ -1,4 +1,4 @@
-import { updateCronSchedule } from '../cron.js';
+import { updateCronSchedule } from '../utils/cron.js';
 import Admin from '../models/admin.js';
 import jwt from 'jsonwebtoken';
 

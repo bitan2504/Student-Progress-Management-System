@@ -47,6 +47,10 @@ const studentSchema = new mongoose.Schema({
         type: Object,
         default: {},
     },
+    inactivityWarnings: {
+        type: Number,
+        default: 0,
+    },
 });
 
 export default mongoose.model('Student', studentSchema);

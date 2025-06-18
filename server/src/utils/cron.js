@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import Admin from './models/admin.js';
-import syncInfo from './utils/codeforces/api/sync.js';
+import Admin from '../models/admin.js';
+import syncInfo from './codeforces/api/sync.js';
 
 let cronInstances = null;
 
@@ -40,17 +40,18 @@ async function updateCronSchedule(newSchedule) {
 
         cronInstances = cron.schedule(
             newSchedule,
-            () => {
+            async () => {
                 console.log(
                     `Running cron job with new schedule: ${newSchedule}`
                 );
-                syncInfo();
+                await syncInfo();
             },
             {
                 scheduled: true,
                 timezone: 'Asia/Kolkata', // Set the timezone to Indian Standard Time
             }
         );
+        // console.log('Cron schedule updated successfully:', cronInstances);
         return cronInstances;
     } catch (error) {
         console.error('Error updating cron schedule:', error);
