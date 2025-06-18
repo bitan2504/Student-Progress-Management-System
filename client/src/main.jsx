@@ -13,6 +13,7 @@ import StudentInfo from './pages/StudentInfo.jsx';
 import AutoSignin from './components/AutoSignin.jsx';
 import { ToastContainer } from 'react-toastify';
 import AddStudent from './pages/AddStudent.jsx';
+import Settings from './pages/Settings.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -65,6 +66,7 @@ createRoot(document.getElementById('root')).render(
               </>
             }
           />
+          <Route path="/settings" element={<Settings />} />
           {/* <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} /> */}
 

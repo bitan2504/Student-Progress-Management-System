@@ -183,7 +183,7 @@ const fetchPage = async (req, res) => {
         // Log the number of students fetched
         console.log(`Fetched ${students.length} students`);
 
-        res.status(400).json({
+        res.status(200).json({
             students,
             message: 'Students fetched successfully',
         });

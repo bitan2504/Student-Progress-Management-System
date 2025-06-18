@@ -22,7 +22,11 @@ const adminSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }
+    },
+    cronSchedule: {
+        type: String,
+        default: '0 0 * * *', // every day at midnight
+    },
 });
 
 /**

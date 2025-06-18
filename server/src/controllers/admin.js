@@ -1,3 +1,4 @@
+import { updateCronSchedule } from '../cron.js';
 import Admin from '../models/admin.js';
 import jwt from 'jsonwebtoken';
 
@@ -21,12 +22,16 @@ const login = async (req, res) => {
     try {
         const admin = await Admin.findOne({ username });
         if (!admin) {
-            return res.status(401).json({ message: 'Invalid username or password' });
+            return res
+                .status(401)
+                .json({ message: 'Invalid username or password' });
         }
 
         const isMatch = await admin.comparePassword(password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid username or password' });
+            return res
+                .status(401)
+                .json({ message: 'Invalid username or password' });
         }
 
         const accessToken = await admin.createAccessToken();
@@ -168,4 +173,54 @@ const register = async (req, res) => {
     }
 };
 
-export { login, logout, register, autosignin };
+/**
+ * Updates the cron job schedule with a new schedule provided in the request body.
+ *
+ * @async
+ * @function updateCron
+ * @param {import('express').Request} req - Express request object containing the new cron schedule in the body.
+ * @param {import('express').Response} res - Express response object used to send the result of the operation.
+ * @returns {Promise<void>} Sends a JSON response indicating success or failure.
+ */
+const updateCron = async (req, res) => {
+    try {
+        const { newSchedule } = req.body;
+        const cronInstance = await updateCronSchedule(newSchedule);
+        if (cronInstance) {
+            res.status(200).json({
+                message: 'Cron schedule updated successfully',
+            });
+        } else {
+            res.status(400).json({ message: 'Failed to update cron schedule' });
+        }
+    } catch (error) {
+        console.error('Error updating cron schedule:', error);
+        res.status(500).json({ message: 'Failed to update cron schedule' });
+    }
+};
+
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    try {
+        const admin = await Admin.findById(req.admin._id);
+        if (!admin) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+
+        const isMatch = await admin.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res
+                .status(401)
+                .json({ message: 'Current password is incorrect' });
+        }
+
+        admin.password = newPassword;
+        await admin.save();
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+export { login, logout, register, autosignin, updateCron, changePassword };
