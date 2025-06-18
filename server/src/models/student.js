@@ -12,10 +12,6 @@ import mongoose from 'mongoose';
  * @property {String} codeforcesHandle - The Codeforces handle/username of the student. Required and trimmed.
  * @property {Number} currentRating - The current Codeforces rating of the student. Required.
  * @property {Number} maxRating - The maximum Codeforces rating achieved by the student. Required.
- *
- * Validation:
- * - `phoneNumber` must be a 10-digit number.
- * - `email` must be unique.
  */
 const studentSchema = new mongoose.Schema({
     name: {

@@ -3,12 +3,16 @@ import Student from '../models/student.js';
 import submissions from '../utils/codeforces/api/submissions.js';
 
 /**
- * Controller to add a new student to the database.
- * Expects the following fields in req.body:
- * - name: String
- * - email: String
- * - phoneNumber: String
- * - codeforcesHandle: String
+ * Adds a new student to the database after checking for duplicates.
+ *
+ * @async
+ * @function addStudent
+ * @param {import('express').Request} req - Express request object containing name, email, phoneNumber, and codeforcesHandle in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a success message upon successful creation or an error message if something goes wrong.
+ *
+ * @throws {401} If a student with the same email, phoneNumber, or Codeforces handle already exists.
+ * @throws {500} If an internal server error occurs.
  */
 const addStudent = async (req, res) => {
     try {
@@ -51,11 +55,17 @@ const addStudent = async (req, res) => {
 };
 
 /**
- * Edits an existing student's details in the database.
+ * Edits the details of an existing student based on provided ID.
+ * Also updates the Codeforces info if the handle has changed.
  *
- * This controller function updates a student's name, email, phone number, and Codeforces handle.
- * It checks for duplicate email, phone number, and Codeforces handle before updating.
- * Responds with appropriate status codes and messages based on the outcome.
+ * @async
+ * @function editStudent
+ * @param {import('express').Request} req - Express request object containing _id, name, email, phoneNumber, and codeforcesHandle in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends updated student data and a success message if successful.
+ *
+ * @throws {401} If no student found or duplicate exists with the same email/handle/phone.
+ * @throws {500} If an internal server error occurs.
  */
 const editStudent = async (req, res) => {
     try {
@@ -129,9 +139,15 @@ const editStudent = async (req, res) => {
 };
 
 /**
- * Controller to fetch a paginated list of students from the database.
- * Expects optional 'start' and 'limit' parameters in req.params.
- * Default: start = 0, limit = 25
+ * Fetches a paginated list of students.
+ *
+ * @async
+ * @function fetchPage
+ * @param {import('express').Request} req - Express request object with optional query params `start` and `limit`.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends a paginated array of student documents.
+ *
+ * @throws {500} If an internal server error occurs.
  */
 const fetchPage = async (req, res) => {
     try {
@@ -179,8 +195,16 @@ const fetchPage = async (req, res) => {
 };
 
 /**
- * Controller to fetch Codeforces user info for given handles.
- * Expects 'codeforcesHandles' array in req.body.
+ * Fetches Codeforces user data for a single handle stored in the database.
+ *
+ * @async
+ * @function fetchCodeforcesInfo
+ * @param {import('express').Request} req - Express request object containing `codeforcesHandle` in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends the codeforcesData object associated with the handle.
+ *
+ * @throws {400} If the handle is missing.
+ * @throws {500} If an internal server error occurs or student is not found.
  */
 const fetchCodeforcesInfo = async (req, res) => {
     try {
@@ -218,6 +242,19 @@ const fetchCodeforcesInfo = async (req, res) => {
     }
 };
 
+/**
+ * Fetches Codeforces submission data for a specific user handle.
+ *
+ * @async
+ * @function fetchSubmissions
+ * @param {import('express').Request} req - Express request object containing `codeforcesHandle` in the body.
+ * @param {import('express').Response} res - Express response object used to send the response.
+ * @returns {Promise<void>} Sends an array of submission data or an error message.
+ *
+ * @throws {400} If the handle is not provided.
+ * @throws {404} If no submissions are found.
+ * @throws {500} If an internal server error occurs.
+ */
 const fetchSubmissions = async (req, res) => {
     try {
         const { codeforcesHandle } = req.body;
