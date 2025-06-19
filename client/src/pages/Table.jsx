@@ -26,7 +26,6 @@ export default function Table() {
           withCredentials: true,
         }
       );
-      console.log(response.data.students);
 
       if (response.status === 200) {
         setRows(response.data.students);
@@ -73,8 +72,8 @@ export default function Table() {
       );
 
       if (response.status === 201) {
-        toast.success('Successfully editted student details');
-        const newRows = rows;
+        toast.success('Successfully edited student details');
+        const newRows = [...rows];
         newRows[editable] = response.data.data;
         setRows(newRows);
       } else {
@@ -95,10 +94,41 @@ export default function Table() {
     setEditable(null);
   }
 
-  useEffect(() => {
-    console.log(editable);
-    console.log(editInputs);
-  }, [editable]);
+  function downloadCSV() {
+    if (!rows.length) {
+      toast.warning('No data to download');
+      return;
+    }
+
+    const headers = [
+      'name',
+      'phoneNumber',
+      'email',
+      'codeforcesHandle',
+      'inactivityWarnings',
+      'rating',
+      'rank',
+      'maxRating',
+      'maxRank',
+    ];
+
+    const csvRows = [
+      headers.join(','),
+      ...rows.map(row =>
+        headers.map(h => `"${(row[h] ?? '').toString().replace(/"/g, '""')}"`).join(',')
+      ),
+    ];
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `students_page_${page}.csv`);
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   return (
     <div className="flex flex-col justify-center items-center mt-10 p-6 bg-white rounded-lg shadow">
@@ -134,9 +164,7 @@ export default function Table() {
                         .replace(/^./, (str) => str.toUpperCase())
                         .trim()}
                     </th>
-                  ) : (
-                    <></>
-                  )
+                  ) : null
                 )}
                 <th className="bg-blue-700 text-white px-4 py-3 font-semibold">
                   Edit Profile
@@ -163,7 +191,9 @@ export default function Table() {
                     ].includes(col) ? (
                       <td
                         key={col}
-                        className={`px-4 py-2 border-b border-gray-200 ${col === 'rank' ? ratingColor[row[col]] + ' font-semibold' : ''}`}
+                        className={`px-4 py-2 border-b border-gray-200 ${
+                          col === 'rank' ? ratingColor[row[col]] + ' font-semibold' : ''
+                        }`}
                       >
                         {editable != idx ||
                         [
@@ -172,18 +202,16 @@ export default function Table() {
                           'codeforcesHandle',
                           'email',
                         ].findIndex((item) => item === col) === -1 ? (
-                          <>
-                            {col !== 'codeforcesHandle' ? (
-                              row[col]
-                            ) : (
-                              <Link
-                                to={`/student/${row.codeforcesHandle}`}
-                                className="text-blue-500 hover:underline"
-                              >
-                                {row[col]}
-                              </Link>
-                            )}
-                          </>
+                          col !== 'codeforcesHandle' ? (
+                            row[col]
+                          ) : (
+                            <Link
+                              to={`/student/${row.codeforcesHandle}`}
+                              className="text-blue-500 hover:underline"
+                            >
+                              {row[col]}
+                            </Link>
+                          )
                         ) : (
                           <input
                             type="text"
@@ -199,14 +227,12 @@ export default function Table() {
                           />
                         )}
                       </td>
-                    ) : (
-                      <></>
-                    )
+                    ) : null
                   )}
                   <td>
                     {idx != editable ? (
                       <button
-                        className={`text-center text-white hover:text-blue-600 duration-500 w-full h-full`}
+                        className="text-center text-white hover:text-blue-600 duration-500 w-full h-full"
                         value={idx}
                         onClick={handleEdit}
                       >
@@ -215,16 +241,10 @@ export default function Table() {
                     ) : (
                       <div className="w-full flex justify-evenly">
                         <button onClick={submitEdit}>
-                          <CheckIcon
-                            className="w-6 h-6 text-green-500"
-                            aria-hidden="true"
-                          />
+                          <CheckIcon className="w-6 h-6 text-green-500" aria-hidden="true" />
                         </button>
                         <button onClick={cancelEdit}>
-                          <XMarkIcon
-                            className="w-6 h-6 text-red-500"
-                            aria-hidden="true"
-                          />
+                          <XMarkIcon className="w-6 h-6 text-red-500" aria-hidden="true" />
                         </button>
                       </div>
                     )}
@@ -246,20 +266,27 @@ export default function Table() {
           </p>
         )}
       </div>
-      <div className="mt-6 text-center">
+
+      <div className="mt-6 flex gap-4 flex-wrap justify-center items-center">
         <button
-          className={`bg-blue-700 text-white px-4 py-2 rounded mr-3 font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed`}
+          className="bg-blue-700 text-white px-4 py-2 rounded font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           disabled={page === 1}
         >
           Previous
         </button>
-        <span className="mx-3 font-semibold text-lg">Page {page}</span>
+        <span className="font-semibold text-lg">Page {page}</span>
         <button
-          className="bg-blue-700 text-white px-4 py-2 rounded ml-3 font-medium transition"
+          className="bg-blue-700 text-white px-4 py-2 rounded font-medium transition"
           onClick={() => setPage((p) => p + 1)}
         >
           Next
+        </button>
+        <button
+          className="bg-green-600 text-white px-4 py-2 rounded font-medium hover:bg-green-700 transition"
+          onClick={downloadCSV}
+        >
+          Download CSV
         </button>
       </div>
     </div>
