@@ -1,6 +1,7 @@
 import user_info from '../utils/codeforces/api/user_info.js';
 import Student from '../models/student.js';
 import submissions from '../utils/codeforces/api/submissions.js';
+import contest_history from '../utils/codeforces/api/contest_history.js';
 
 /**
  * Adds a new student to the database after checking for duplicates.
@@ -31,6 +32,7 @@ const addStudent = async (req, res) => {
         }
 
         const codeforcesData = await user_info([codeforcesHandle]);
+        const contestHistory = await contest_history(codeforcesHandle);
 
         // Create a new student document
         const newStudent = new Student({
@@ -39,6 +41,7 @@ const addStudent = async (req, res) => {
             phoneNumber,
             codeforcesHandle,
             codeforcesData: codeforcesData[0],
+            contestHistory: contestHistory,
         });
 
         // Save the student to the database
@@ -107,6 +110,8 @@ const editStudent = async (req, res) => {
         if (student.codeforcesHandle !== codeforcesHandle) {
             student.codeforcesHandle = codeforcesHandle;
             const codeforcesData = await user_info([codeforcesHandle]);
+            const contestHistory = await contest_history(codeforcesHandle);
+            student.contestHistory = contestHistory;
             student.codeforcesData = codeforcesData[0];
         }
         // Save the student to the database
@@ -232,7 +237,8 @@ const fetchCodeforcesInfo = async (req, res) => {
         // Log success and send response
         console.log('Fetched Codeforces user info successfully');
         res.status(200).json({
-            data: userInfo?.codeforcesData,
+            codeforcesData: userInfo?.codeforcesData,
+            contestHistory: userInfo?.contestHistory,
             message: 'Fetched Codeforces user info successfully',
         });
     } catch (error) {

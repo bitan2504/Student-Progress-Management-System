@@ -1,6 +1,8 @@
 import Student from '../../../models/student.js';
 import axios from 'axios';
 import sendEmail from '../../nodemailer.js';
+import user_info from './user_info.js';
+import contest_history from './contest_history.js';
 
 const checkInactivity = async (handle) => {
     try {
@@ -61,19 +63,22 @@ const syncInfo = async () => {
             }
 
             try {
-                const response = await axios.get(
-                    `https://codeforces.com/api/user.info?handles=${student.codeforcesHandle}`
+                const codeforcesData = await user_info([
+                    student.codeforcesHandle,
+                ]);
+                const contestHistory = await contest_history(
+                    student.codeforcesHandle
                 );
-                if (
-                    response.data.status === 'OK' &&
-                    response.data.result.length > 0
-                ) {
-                    student.codeforcesData = response.data.result[0];
-                    await student.save();
+                if (codeforcesData && codeforcesData.length > 0) {
+                    student.codeforcesData = codeforcesData[0];
                 }
+                if (contestHistory && contestHistory.length > 0) {
+                    student.contestHistory = contestHistory;
+                }
+                await student.save();
             } catch (error) {
                 console.error(
-                    `Error fetching data for ${student.codeforcesHandle}:`,
+                    `Error syncing Codeforces data for ${student.codeforcesHandle}:`,
                     error
                 );
             }

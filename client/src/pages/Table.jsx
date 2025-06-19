@@ -114,7 +114,17 @@ export default function Table() {
             <thead>
               <tr>
                 {columns.map((col) =>
-                  col !== '_id' && col !== 'codeforcesData' ? (
+                  [
+                    'name',
+                    'phoneNumber',
+                    'email',
+                    'codeforcesHandle',
+                    'inactivityWarnings',
+                    'rating',
+                    'rank',
+                    'maxRating',
+                    'maxRank',
+                  ].includes(col) ? (
                     <th
                       key={col}
                       className="bg-blue-700 text-white px-4 py-3 text-left font-semibold"
@@ -140,7 +150,17 @@ export default function Table() {
                   className={`w-20 ${idx % 2 === 0 ? '' : 'bg-blue-50'}`}
                 >
                   {columns.map((col) =>
-                    col !== '_id' && col !== 'codeforcesData' ? (
+                    [
+                      'name',
+                      'phoneNumber',
+                      'email',
+                      'codeforcesHandle',
+                      'inactivityWarnings',
+                      'rating',
+                      'rank',
+                      'maxRating',
+                      'maxRank',
+                    ].includes(col) ? (
                       <td
                         key={col}
                         className={`px-4 py-2 border-b border-gray-200 ${col === 'rank' ? ratingColor[row[col]] + ' font-semibold' : ''}`}

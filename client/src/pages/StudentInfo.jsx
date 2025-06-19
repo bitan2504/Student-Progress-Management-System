@@ -189,9 +189,111 @@ function SubmissionApp({ submissions, setSubmissions, handle, token }) {
   );
 }
 
+function ContestHistory({ contestHistory }) {
+  const [selectedFilter, setSelectedFilter] = useState('All');
+  const filters = {
+    '30 days': 30 * 24 * 60 * 60,
+    '90 days': 90 * 24 * 60 * 60,
+    '365 days': 365 * 24 * 60 * 60,
+    All: null,
+  };
+
+  const filterContests = () => {
+    if (!contestHistory) return [];
+    if (selectedFilter === 'All') return contestHistory;
+    const now = Date.now() / 1000;
+    return contestHistory.filter(
+      (contest) =>
+        now - (contest.ratingUpdateTimeSeconds || 0) <= filters[selectedFilter]
+    );
+  };
+
+  const filteredContests = filterContests();
+
+  if (!contestHistory || contestHistory.length === 0) {
+    return (
+      <div className="w-3/5 mx-auto mt-8 p-6 bg-zinc-100 rounded-lg shadow-md text-gray-500 text-center">
+        No contest history available.
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-3/5 mx-auto mt-8 p-6 bg-zinc-100 rounded-lg shadow-md">
+      <h4 className="text-lg text-blue-700 font-bold mb-4 text-center">
+        Contest History
+      </h4>
+      <div className="flex justify-end mb-2">
+        <label className="text-gray-600 text-sm mr-2">Show for</label>
+        <select
+          className="border border-gray-300 rounded px-2 py-1 text-sm"
+          value={selectedFilter}
+          onChange={(e) => setSelectedFilter(e.target.value)}
+        >
+          {Object.keys(filters).map((filter) => (
+            <option key={filter} value={filter}>
+              {filter}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm text-left">
+          <thead>
+            <tr>
+              <th className="px-4 py-2">#</th>
+              <th className="px-4 py-2">Contest</th>
+              <th className="px-4 py-2">Rank</th>
+              <th className="px-4 py-2">Old Rating</th>
+              <th className="px-4 py-2">New Rating</th>
+              <th className="px-4 py-2">Change</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredContests.map((contest, idx) => (
+              <tr key={contest.contestId} className="border-t">
+                <td className="px-4 py-2">{idx + 1}</td>
+                <td className="px-4 py-2">
+                  <a
+                    href={`https://codeforces.com/contest/${contest.contestId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {contest.contestName}
+                  </a>
+                </td>
+                <td className="px-4 py-2">{contest.rank}</td>
+                <td className="px-4 py-2">{contest.oldRating}</td>
+                <td className="px-4 py-2">{contest.newRating}</td>
+                <td
+                  className={`px-4 py-2 font-semibold ${
+                    contest.newRating - contest.oldRating >= 0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {contest.newRating - contest.oldRating >= 0 ? '+' : ''}
+                  {contest.newRating - contest.oldRating}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {filteredContests.length === 0 && (
+          <div className="text-gray-500 text-center mt-4">
+            No contests in selected period.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function StudentInfo() {
   const { handle } = useParams();
   const [studentInfo, setStudentInfo] = useState(null);
+  const [contestHistory, setContestHistory] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -211,7 +313,8 @@ export default function StudentInfo() {
         }
       );
       if (response.status === 200) {
-        setStudentInfo(response.data.data);
+        setStudentInfo(response.data.codeforcesData);
+        setContestHistory(response.data.contestHistory || []);
       }
     } catch (error) {
       setError('Failed to fetch student information.');
@@ -296,12 +399,15 @@ export default function StudentInfo() {
         )}
       </div>
       {studentInfo && (
-        <SubmissionApp
-          submissions={submissions}
-          setSubmissions={setSubmissions}
-          handle={studentInfo.handle}
-          token={token}
-        />
+        <>
+          <ContestHistory contestHistory={contestHistory} />
+          <SubmissionApp
+            submissions={submissions}
+            setSubmissions={setSubmissions}
+            handle={studentInfo.handle}
+            token={token}
+          />
+        </>
       )}
     </div>
   );

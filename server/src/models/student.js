@@ -51,6 +51,10 @@ const studentSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    contestHistory: {
+        type: Array,
+        default: [],
+    },
 });
 
 export default mongoose.model('Student', studentSchema);
