@@ -4,6 +4,10 @@ import sendEmail from '../../nodemailer.js';
 import user_info from './user_info.js';
 import contest_history from './contest_history.js';
 
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 const checkInactivity = async (handle) => {
     try {
         const response = await axios.get(
@@ -36,7 +40,8 @@ const syncInfo = async () => {
         const students = await Student.find({
             codeforcesData: { $exists: true },
         });
-        students.forEach(async (student) => {
+        for (let i = 0; i < students.length; i++) {
+            const student = students[i];
             try {
                 const isInactive = await checkInactivity(
                     student.codeforcesHandle
@@ -48,8 +53,8 @@ const syncInfo = async () => {
                         to: student.email,
                         subject: 'Codeforces Inactivity Warning',
                         html: `<p>Dear ${student.name},</p>
-<p>You have been <strong>inactive on Codeforces for 7 days</strong>. Please try to solve some problems to keep your skills sharp!</p>
-<p>Best regards,<br>Your Friendly Reminder Bot</p>`,
+                <p>You have been <strong>inactive on Codeforces for 7 days</strong>. Please try to solve some problems to keep your skills sharp!</p>
+                <p>Best regards,<br>Your Friendly Reminder Bot</p>`,
                     });
                     console.log(
                         `Sent inactivity warning to ${student.codeforcesHandle}`
@@ -82,7 +87,9 @@ const syncInfo = async () => {
                     error
                 );
             }
-        });
+
+            await sleep(500);
+        }
     } catch (error) {
         console.error('Error syncing Codeforces data:', error);
     }
